@@ -1,0 +1,57 @@
+import { useState, useEffect } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Table } from "@/components/ui/table";
+
+export default function HelpdeskTickets() {
+  const [tickets, setTickets] = useState([]);
+  const [newTicket, setNewTicket] = useState("");
+
+  useEffect(() => {
+    fetch("http://localhost:5000/tickets")
+      .then((res) => res.json())
+      .then((data) => setTickets(data));
+  }, []);
+
+  const addTicket = () => {
+    fetch("http://localhost:5000/tickets", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: newTicket, status: "Open" })
+    }).then(() => {
+      setNewTicket("");
+      window.location.reload();
+    });
+  };
+
+  return (
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-4">Helpdesk Tickets</h1>
+      <div className="flex gap-2 mb-4">
+        <Input
+          placeholder="Enter ticket title"
+          value={newTicket}
+          onChange={(e) => setNewTicket(e.target.value)}
+        />
+        <Button onClick={addTicket}>Add Ticket</Button>
+      </div>
+      <Table>
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {tickets.map((ticket) => (
+            <tr key={ticket._id}>
+              <td>{ticket.title}</td>
+              <td>{ticket.status}</td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
+    </div>
+  );
+}
